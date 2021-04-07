@@ -7,7 +7,8 @@ const gameSchema = {
       type: "string"
     },
     action: {
-      type: "string"
+      type: "string",
+      enum: ["KILL_VOTE", "VOTE", "INSPECT", "HEAL"]
     },
     to: {
       type: "string"

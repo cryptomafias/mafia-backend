@@ -3,4 +3,8 @@ getThreads = async(client, threadId, roomId) => {
     return threads
 }
 
-module.exports = {getThreads}
+createThreads = async(client, threadId, threads) => {
+    await client.create(threadId, "threadLookUp", [threads])
+}
+
+module.exports = {getThreads, createThreads}
