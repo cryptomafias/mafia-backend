@@ -1,5 +1,7 @@
 const rooms = require('./rooms');
 const threadLookUp = require("./threadLookUp");
+const playerState = require("./playerState");
+const game = require("./game");
 const validators = require('../validators');
 const schemas = require('../schemas');
 
@@ -26,5 +28,7 @@ module.exports = {
     createCollection,
     initCollections,
     Rooms: rooms.Rooms,
-    threadLookUp
+    threadLookUp,
+    playerState,
+    game
 }
