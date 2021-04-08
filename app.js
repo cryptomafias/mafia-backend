@@ -4,9 +4,11 @@ const bodyParser = require("body-parser");
 const Graceful = require('@ladjs/graceful');
 const Cabin = require('cabin');
 const Bree = require('bree');
+const morgan = require('morgan');
+const cors = require('cors');
 
 const getHub = require("./config/hub");
-const modelsFactory = require(" ./models");
+const modelsFactory = require("./models");
 
 const app = express();
 const identity = hub.PrivateKey.fromString(process.env.IDENTITY);
@@ -31,6 +33,8 @@ function errorHandler(callback) {
 }
 
 app.use(bodyParser.json());
+app.use(morgan("combined"));
+app.use(cors());
 
 // Create new room
 app.post("/rooms", errorHandler(async(req, res, next) => {
