@@ -32,7 +32,7 @@ async function heal(client, threadId, gamePhaseName, doctorId, victimId){
 }
 
 async function nightResult(client, threadId, gamePhaseName){
-    const gameActions = client.find(threadId, gamePhaseName, {})
+    const gameActions = await client.find(threadId, gamePhaseName, {})
     const mafiaVote = {}
     let healedPlayer
     for(let gameAction of gameActions){
@@ -41,6 +41,9 @@ async function nightResult(client, threadId, gamePhaseName){
         } else if (gameAction.action === "HEAL"){
             healedPlayer = gameAction.to
         }
+    }
+    if(mafiaVote){
+        return {deadPlayer: "none"}
     }
     const deadPlayer = Object.keys(mafiaVote).reduce((a, b) => mafiaVote[a] > mafiaVote[b] ? a : b);
     if(deadPlayer === healedPlayer){
@@ -51,12 +54,15 @@ async function nightResult(client, threadId, gamePhaseName){
 }
 
 async function dayResult(client, threadId, gamePhaseName){
-    const gameActions = client.find(threadId, gamePhaseName, {})
+    const gameActions = await client.find(threadId, gamePhaseName, {})
     const votes = {}
     for(let gameAction of gameActions){
         if(gameAction.action === "KILL_VOTE"){
             votes[gameAction.to] = votes.hasOwnProperty(gameAction.to) ? votes[gameAction.to] + 1 : 1
         }
+    }
+    if(votes){
+        return {ejectedPlayer: "none"}
     }
     const keysSorted = Object.keys(votes).sort((a, b) => (votes[b] - votes[a]))
     const highestVote = votes[keysSorted[0]]
