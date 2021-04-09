@@ -16,7 +16,7 @@ const gameThread = hub.ThreadID.fromString(process.env.GAME_THREAD);
 
 const logger = new Cabin();
 const bree = new Bree({
-    logger,
+    logger
 });
 const graceful = new Graceful({ brees: [bree] });
 
@@ -157,9 +157,18 @@ app.put("/rooms/:roomId/heal", errorHandler(async(req, res, next) => {
     }
 }))
 
+app.get("/rooms/:roomId", errorHandler(async(req, res, next) => {
+    await models.rooms.updateRoomPhase(req.params.roomId)
+    res.send("success")
+}))
+
 app.listen(5000, "0.0.0.0", async function(){
     hubConfig = await getHub(identity);
-    await modelsFactory.initCollections(hubConfig.client, gameThread);
+    await modelsFactory.initCollections(
+        hubConfig.client,
+        gameThread,
+        [{name: "rooms"}, {name: "threadLookUp"}]
+    );
     models.rooms = new modelsFactory.Rooms(identity, hubConfig.client, gameThread, bree);
     graceful.listen();
     bree.start();
