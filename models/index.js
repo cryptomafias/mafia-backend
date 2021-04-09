@@ -1,13 +1,8 @@
 const rooms = require('./rooms');
 const threadLookUp = require("./threadLookUp");
-const validators = require('../validators');
-const schemas = require('../schemas');
-
-async function createCollection(client, threadId, name){
-    const schema = schemas[name]
-    const writeValidator = validators[name].writeValidator
-    await client.newCollection(threadId, { name, schema, writeValidator})
-}
+const playerState = require("./playerState");
+const game = require("./game");
+const {createCollection} = require("./utils");
 
 async function initCollections(client, threadId){
     const collections = await client.listCollections(threadId)
@@ -23,8 +18,10 @@ async function initCollections(client, threadId){
 }
 
 module.exports = {
-    createCollection,
     initCollections,
+    createCollection,
     Rooms: rooms.Rooms,
-    threadLookUp
+    threadLookUp,
+    playerState,
+    game
 }

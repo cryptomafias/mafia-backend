@@ -1,17 +1,21 @@
-class PlayerState {
-    constructor(client, threadId) {
-        this.client = client;
-        this.threadId = threadId;
-    }
+addPlayers = async(client, threadId, players) => {
+    const playerIds = await client.create(threadId, "playerState", players)
+    return playerIds
+}
 
-    addPlayers = async(players) => {
-        const playerIds = await this.client.create(this.threadId, "playerState", players)
-        return playerIds
-    }
+markPlayerDead = async(client, threadId, playerId) => {
+    const player = await client.findByID(threadId, "playerState", playerId)
+    player.isAlive = false
+    await this.client.save(threadId, "playerState", [player])
+}
 
-    markPlayerDead = async(playerId) => {
-        const player = await this.client.findByID(playerId)
-        player.isAlive = false
-        await this.client.save(this.threadId, "playerState", [player])
-    }
+getPlayer = async(client, threadId, playerId) => {
+    const player = await client.findByID(threadId, "playerState", playerId)
+    return player
+}
+
+module.exports = {
+    addPlayers,
+    markPlayerDead,
+    getPlayer
 }

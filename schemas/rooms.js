@@ -12,8 +12,7 @@ const roomSchema = {
       enum: ["WAITING", "NIGHT", "DISCUSSION", "VOTING", "ENDED"]
     },
     currentDay: {
-      type: "integer",
-      default: 0
+      type: "integer"
     },
     villagerThread: {
       type: "string"
