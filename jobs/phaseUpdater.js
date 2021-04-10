@@ -28,8 +28,8 @@ if (parentPort){
 const updater = async () => {
     if (isCancelled) return;
     const hubConfig = await getHub(identity)
-
     const room = await hubConfig.client.findByID(threadId, 'rooms', roomId)
+    console.log("update phase job running!")
     let message, winner
     switch (room.phase) {
         case "WAITING":
@@ -48,16 +48,18 @@ const updater = async () => {
                 threads.gameStateThread,
                 `NIGHT-${room.currentDay}`
             )
-            await models.playerState.markPlayerDead(
-                hubConfig.client,
-                threadId,
-                nightResult.deadPlayer
-            )
+            if(nightResult.deadPlayer !== "none"){
+                await models.playerState.markPlayerDead(
+                    hubConfig.client,
+                    threads.gameStateThread,
+                    nightResult.deadPlayer
+                )
+            }
             message = {
                 subject: "DEAD_PLAYER",
-                message: nightResult,
+                message: nightResult.deadPlayer,
                 to: "ALL",
-                from: this.identity.public.toString(),
+                from: identity.public.toString(),
                 type: "SYSTEM"
             }
             await hubConfig.client.create(threads.villagerThread, 'chat', [message])
@@ -67,29 +69,40 @@ const updater = async () => {
             await models.initCollections(
                 hubConfig.client,
                 threads.gameStateThread,
-                [{name: `DAY-${room.currentDay}`}, {type: "game"}]
+                [{name: `DAY-${room.currentDay}`, type: "game"}]
             )
             break
         case "VOTING":
             room.phase = "NIGHT"
-            room.currentDay += 1
-            await models.initCollections(
-                hubConfig.client,
-                threads.gameStateThread,
-                [{name: `NIGHT-${room.currentDay}`}, {type: "game"}]
-            )
-            const dayResult = await models.game.nightResult(
+            console.log("day result calculation...")
+            const dayResult = await models.game.dayResult(
                 hubConfig.client,
                 threads.gameStateThread,
                 `DAY-${room.currentDay}`
             )
-            await models.playerState.markPlayerDead(hubConfig.client, threadId, dayResult.deadPlayer)
+            console.log("init next phase")
+            room.currentDay += 1
+            await models.initCollections(
+                hubConfig.client,
+                threads.gameStateThread,
+                [{name: `NIGHT-${room.currentDay}`, type: "game"}]
+            )
+            console.log(dayResult)
+            console.log("mark player dead")
+            if(dayResult.ejectedPlayer !== "none"){
+                await models.playerState.markPlayerDead(
+                    hubConfig.client,
+                    threads.gameStateThread,
+                    dayResult.ejectedPlayer
+                )
+            }
+            console.log("notifying player")
+            // await models.playerState.markPlayerDead(hubConfig.client, threads.gameStateThread, dayResult.deadPlayer)
             message = {
                 subject: "EJECTED_PLAYER",
-                message: dayResult,
+                message: dayResult.ejectedPlayer,
                 to: "ALL",
-
-                from: hubConfig.identity.public.toString(),
+                from: identity.public.toString(),
                 type: "SYSTEM"
             }
             await hubConfig.client.create(threads.villagerThread, 'chat', [message])
@@ -101,7 +114,7 @@ const updater = async () => {
             break
     }
     await hubConfig.client.save(threadId, "rooms", [room])
-    winner = await models.game.checkWinningCondition(hubConfig.client, threadId)
+    winner = await models.game.checkWinningCondition(hubConfig.client, threads.gameStateThread)
     if (winner) {
         message = {
             subject: "WINNER",
