@@ -1,7 +1,6 @@
 const shuffleSeed = require('shuffle-seed');
 const {PolyRand, PolyAES} = require('poly-crypto');
 const {PublicKey} = require('@textile/hub');
-const toBuffer = require("it-to-buffer");
 const threadLookUp = require("./threadLookUp");
 const playerState = require("./playerState");
 const utils = require("./utils");
@@ -61,9 +60,9 @@ class Rooms {
             const players = []
             const messages = []
             for (let i = 0; i < 8; i++) {
-                const hexKey = PolyRand.slug(16)
+                const hexKey = PolyRand.hex(64)
                 const player = {
-                    _id: i,
+                    _id: `${i}`,
                     publicId: room.players[i],
                     role: shuffledRoles[i],
                     key: hexKey,
@@ -72,7 +71,7 @@ class Rooms {
                 players.push(player)
                 const pubKey = PublicKey.fromString(playerPublicId)
                 const encryptedRole = await pubKey.encrypt(Buffer.from(PolyAES.withKey(hexKey).encrypt(shuffledRoles[i])))
-                const encryptedRoleString = await toBuffer(encryptedRole)
+                const encryptedRoleString = encryptedRole.toString()
                 const messagePayload = (shuffledRoles[i] === "MAFIA") ? JSON.stringify({
                     encryptedRole: encryptedRoleString,
                     mafiaThread: threads.mafiaThread
