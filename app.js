@@ -162,7 +162,7 @@ app.get("/rooms/:roomId", errorHandler(async(req, res, next) => {
     res.send("success")
 }))
 
-app.listen(5000, "0.0.0.0", async function(){
+app.listen(process.env.PORT || 5000, "0.0.0.0", async function(){
     hubConfig = await getHub(identity);
     await modelsFactory.initCollections(
         hubConfig.client,
