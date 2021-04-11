@@ -162,7 +162,12 @@ app.get("/rooms/:roomId", errorHandler(async(req, res, next) => {
     res.send("success")
 }))
 
-app.listen(process.env.PORT || 5000, "0.0.0.0", async function(){
+app.delete("/rooms/:roomId", errorHandler(async(req, res, next) => {
+    bree.stop(req.params.roomId)
+    res.send("success")
+}))
+
+app.listen(process.env.PORT || 8000, "0.0.0.0", async function(){
     hubConfig = await getHub(identity);
     await modelsFactory.initCollections(
         hubConfig.client,
