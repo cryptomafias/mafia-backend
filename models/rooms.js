@@ -69,19 +69,22 @@ class Rooms {
                     isAlive: true
                 }
                 players.push(player)
-                const pubKey = PublicKey.fromString(playerPublicId)
-                const encryptedRole = await pubKey.encrypt(Buffer.from(PolyAES.withKey(hexKey).encrypt(shuffledRoles[i])))
-                const encryptedRoleString = encryptedRole.toString()
+                const pubKey = PublicKey.fromString(room.players[i])
+                const encryptedRoleString = PolyAES.withKey(hexKey).encrypt(shuffledRoles[i])
+                const encryptedHexKey = await pubKey.encrypt(Buffer.from(hexKey))
+                const encryptedHexKeyString = encryptedHexKey.toString()
                 const messagePayload = (shuffledRoles[i] === "MAFIA") ? JSON.stringify({
                     encryptedRole: encryptedRoleString,
+                    encryptedHexKey: encryptedHexKeyString,
                     mafiaThread: threads.mafiaThread
                 }) : JSON.stringify({
-                    encryptedRole: encryptedRoleString
+                    encryptedRole: encryptedRoleString,
+                    encryptedHexKey: encryptedHexKeyString
                 })
                 const message = {
                     subject: "RoleAssignment",
                     message: messagePayload,
-                    to: playerPublicId,
+                    to: room.players[i],
                     from: this.identity.public.toString(),
                     type: "SYSTEM"
                 }
