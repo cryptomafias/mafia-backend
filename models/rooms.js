@@ -35,6 +35,7 @@ class Rooms {
             mafiaThread,
             gameStateThread
         })
+        await utils.initCollections(this.client, ThreadID.fromString(villagerThread), [{name: "chat"}]);
         return {roomId}
     }
 
